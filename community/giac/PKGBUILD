@@ -4,7 +4,7 @@
 #  - delete shipped x86 binary src/mkjs to force rebuild for ARM
 
 pkgname=giac
-_pkgver=1.9.0-23
+_pkgver=1.9.0-41
 pkgver=${_pkgver//-/.}
 pkgrel=1
 pkgdesc='A free computer algebra system'
@@ -17,13 +17,13 @@ optdepends=('perl: for pgiac')
 replaces=(libgiac xcas)
 provides=(libgiac xcas)
 source=(http://www-fourier.ujf-grenoble.fr/~parisse/debian/dists/stable/main/source/${pkgname}_$_pkgver.tar.gz
-        giac-pari-2.15.patch)
-sha256sums=('b98e3c90977aedf45748582b45b5127285f46d83fe8e6f3632f41dcb56527a1e'
-            'cb1d6e783f2a1f05c2ec7319874089e6a2ab6316f65661087796452b9b8efb21')
+        format-security.patch)
+sha256sums=('fa8a5680a1b8d0f1d1c99aeaffc917dcf3b0de214f39cbed20b99a5e5e1d8c18'
+            '04288944e408807a15aa502e1215087870d8921229c9f9890d862d3c9de337cd')
 
 prepare() {
   cd $pkgname-${pkgver%.*}
-  patch -p1 < ../giac-pari-2.15.patch # Fix build with pari 2.15
+  patch -p1 < ../format-security.patch # Fix -Werror=format-security errors
   rm -f src/mkjs # force rebuild for ARM
 }
 

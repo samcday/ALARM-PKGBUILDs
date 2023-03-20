@@ -6,7 +6,7 @@
 
 pkgname=rdma-core
 pkgdesc='RDMA core userspace libraries and daemons'
-pkgver=42.0
+pkgver=44.0
 pkgrel=1
 arch=('x86_64')
 url="https://github.com/linux-rdma/rdma-core"
@@ -21,7 +21,7 @@ conflicts=("${_provides[@]}")
 replaces=("${_provides[@]}")
 backup=(etc/rdma/{rdma.conf,mlx4.conf})
 source=("https://github.com/linux-rdma/rdma-core/archive/v$pkgver/$pkgname-$pkgver.tar.gz")
-sha512sums=('d249d17e115243704d3018cd2924e0b16d10c917c4dcf8240a8107026f5c50c7811ab7ce70e52d3f5493dcbbc156ac75d8cfe90a0259025563150d3a9a3bbd83')
+sha512sums=('7375bf352a28d8bec2525f518381596c39dec185fa06068a580dc31a386187351d039bbf28b6b1e3779d092ed492cf0ba882dbcd5c3c2290e3edf250e5545f19')
 validpgpkeys=('42D25385C1A1C02B8B1B1C6F801BDDB825988F64') # nicolas@morey-chaisemartin.com
 
 prepare() {

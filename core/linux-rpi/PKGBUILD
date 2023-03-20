@@ -5,11 +5,12 @@
 # Contributer: Jan Alexander Steffens (heftig) <heftig@archlinux.org>
 
 pkgbase=linux-rpi
-_commit=dbd073e4028580a09b6ee507e0c137441cb52650
+_commit=0ac970bd2668fe68da8a24b73e74ee5d2b64cf89
 _srcname=linux-${_commit}
 _kernelname=${pkgbase#linux}
-pkgver=5.15.74
-pkgrel=1
+_regen=
+pkgver=6.1.19
+pkgrel=2
 pkgdesc='Linux'
 url="http://www.kernel.org/"
 arch=(armv7h aarch64)
@@ -26,16 +27,18 @@ source=("linux-$pkgver-${_commit:0:10}.tar.gz::https://github.com/raspberrypi/li
         linux.preset
         60-linux.hook
         90-linux.hook
+        archarm.diffconfig
 )
-md5sums=('512d0090023950e9b8796c59f33a36d5'
+md5sums=('6b602f38fe3cb24650200d328dec6c1a'
          '3bab7426d8c8818dda8353da3892a41f'
          'f66a7ea3feb708d398ef57e4da4815e9'
          '86d4a35722b5410e3b29fc92dae15d4b'
          '0a5f16bfec6ad982a2f6782724cca8ba'
-         '441ec084c47cddc53e592fb0cbce4edf')
-md5sums_armv7h=('6f6fc7cdf18930dd937c358082a5ac20'
-                'aedda0148db2692971671e6aa90ad9ff')
-md5sums_aarch64=('36c7f594332ac5cdf92f0e6be7a7f7b3'
+         '441ec084c47cddc53e592fb0cbce4edf'
+         'd1a9b105e3d6b8c4cf2a8411258f7fdf')
+md5sums_armv7h=('3de023782880c2a6736e4c131ffd30fe'
+                '177bbdbe1baa46a04dcba86352cfa3fe')
+md5sums_aarch64=('2915c3e47347949feb7a737842d69500'
                  '7e4403dea857e40005bf76beda9927ff')
 
 # setup vars
@@ -49,19 +52,34 @@ prepare() {
   cd "${srcdir}/${_srcname}"
 
   # consistent behavior of lscpu on arm/arm64
-  patch -Np1 -i ../0001-Make-proc-cpuinfo-consistent-on-arm64-and-arm.patch
+  patch -p1 -i ../0001-Make-proc-cpuinfo-consistent-on-arm64-and-arm.patch
 
   echo "Setting version..."
   scripts/setlocalversion --save-scmversion
   echo "-$pkgrel" > localversion.10-pkgrel
   echo "${pkgbase#linux}" > localversion.20-pkgname
 
-  echo "Setting config..."
-  cp ../"$_config" .config
-  make olddefconfig
+  if [[ $_regen -eq 1 ]]; then
+    # useful on two point releases to keep shit straight
+    echo "Applying custom shit to bcm2711_defconfig"
+    make bcm2711_defconfig
+    cat ../archarm.diffconfig >> .config
+    make oldconfig
+    if [[ $CARCH == "armv7h" ]]; then
+      # https://archlinuxarm.org/forum/viewtopic.php?f=23&t=16373
+      scripts/config --enable CONFIG_BCM2835_THERMAL
+    fi
+    sed '/^CONFIG_LOCALVERSION=/s,.*$,CONFIG_LOCALVERSION="-ARCH",' .config >$startdir/newconfig.$_config
+    echo "verify that newconfig.$_config is fit for purpose then redefine $_config"
+    exit
+  else
+    echo "Setting config..."
+    cp ../"$_config" .config
+    make olddefconfig
+    make -s kernelrelease > version
+    echo "Prepared $pkgbase version $(<version)"
+  fi
 
-  make -s kernelrelease > version
-  echo "Prepared $pkgbase version $(<version)"
 }
 
 build() {
@@ -87,7 +105,6 @@ _package() {
 
   # Used by mkinitcpio to name the kernel
   echo "$pkgbase" | install -Dm644 /dev/stdin "$modulesdir/pkgbase"
-
   echo "Installing modules..."
   make INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_STRIP=1 \
     DEPMOD=/doesnt/exist modules_install  # Suppress depmod
@@ -180,6 +197,12 @@ _package-headers() {
     echo "Removing $(basename "$_arch")"
     rm -r "$_arch"
   done
+
+  echo "Symlinking common aliases..."
+  # https://archlinuxarm.org/forum/viewtopic.php?f=60&t=16354
+  ln -sr arm "$builddir/arch/armv7h"
+  ln -sr arm "$builddir/arch/armv7l"
+  ln -sr arm64 "$builddir/arch/aarch64"
 
   echo "Removing documentation..."
   rm -r "$builddir/Documentation"

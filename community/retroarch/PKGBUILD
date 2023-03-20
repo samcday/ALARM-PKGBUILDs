@@ -7,8 +7,8 @@
 #  - disable broken pkgver function
 
 pkgname=retroarch
-pkgver=1.12.0
-pkgrel=1
+pkgver=1.14.0
+pkgrel=2
 pkgdesc='Reference frontend for the libretro API'
 arch=(x86_64)
 url=http://www.libretro.com/
@@ -63,7 +63,7 @@ optdepends=(
   'wayland: Wayland support'
 )
 backup=(etc/retroarch.cfg)
-_tag=415925c5dc73e9f080d8edf36398434038648507
+_tag=ad89b0c655fc1d25adfcdf40268e95c5d0391111
 source=(
   git+https://github.com/libretro/RetroArch.git#tag=${_tag}
   retroarch-config.patch

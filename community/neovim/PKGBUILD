@@ -7,8 +7,8 @@
 #  - -DENABLE_LTO=OFF
 
 pkgname=neovim
-pkgver=0.8.0
-pkgrel=3
+pkgver=0.8.3
+pkgrel=1
 pkgdesc='Fork of Vim aiming to improve user experience, plugins, and GUIs'
 arch=('x86_64')
 url='https://neovim.io'
@@ -21,9 +21,8 @@ optdepends=('python-neovim: for Python 3 plugin support (see :help python)'
             'xclip: for clipboard support on X11 (or xsel) (see :help clipboard)'
             'xsel: for clipboard support on X11 (or xclip) (see :help clipboard)'
             'wl-clipboard: for clipboard support on wayland (see :help clipboard)')
-options=('debug')
 source=("https://github.com/neovim/neovim/archive/v${pkgver}/${pkgname}-${pkgver}.tar.gz")
-sha512sums=('e9504e33df292043656b0ef064e465069c93d4be52bbe29ec33c111f3e00ed83647148d653e3f143e2243dac537eede6a9351990bd858ac20abc8edbc5249432')
+sha512sums=('0ecf60b564a323eb95eb2e67f7dc7e1c1e7bfc70b08466a66eb668d1b75a7362ca42901cd5a64fda22292375e2921ba61c299ac846f820ac146dc55426813eb8')
 
 build() {
   cmake \
@@ -33,7 +32,7 @@ build() {
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DENABLE_LTO=OFF \
     -W no-dev \
-    -S neovim-$pkgver
+    -S ${pkgname}-${pkgver}
   cmake --build build --verbose
 }
 
@@ -45,10 +44,11 @@ check() {
 package() {
   DESTDIR="$pkgdir" cmake --install build
 
-  install -Dm644 neovim-$pkgver/LICENSE.txt -t "${pkgdir}/usr/share/licenses/${pkgname}/"
-  install -Dm644 neovim-$pkgver/runtime/nvim.desktop -t "${pkgdir}/usr/share/applications/"
-  install -Dm644 neovim-$pkgver/runtime/nvim.appdata.xml -t "${pkgdir}/usr/share/metainfo/"
-  install -Dm644 neovim-$pkgver/runtime/nvim.png -t "${pkgdir}/usr/share/pixmaps/"
+  cd ${pkgname}-${pkgver}
+  install -Dm644 LICENSE.txt -t "${pkgdir}/usr/share/licenses/${pkgname}/"
+  install -Dm644 runtime/nvim.desktop -t "${pkgdir}/usr/share/applications/"
+  install -Dm644 runtime/nvim.appdata.xml -t "${pkgdir}/usr/share/metainfo/"
+  install -Dm644 runtime/nvim.png -t "${pkgdir}/usr/share/pixmaps/"
 
   # Make Arch vim packages work
   mkdir -p "${pkgdir}"/etc/xdg/nvim
